@@ -1,5 +1,5 @@
 
-#library(systemfonts)
+library(systemfonts)
 library(shiny)
 library(RPostgres)
 library(lubridate)
@@ -30,5 +30,8 @@ library(kinematics)
 library(reticulate)
 library(httr)
 library(jsonlite)
+library(recipes)
+library(modeldata)
+library(themis)
 
 

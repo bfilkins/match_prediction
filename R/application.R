@@ -10,10 +10,9 @@ source("R/environment/theme.R")
 
 # Load Data ####
 source_python("Python/query/matches_api_query.py")
-#source("R/environment/load_data.R")
 
-# Model Goal Position ####
-#source("R/movement_analysis/predicting_goalie_position.R")
+# Model Match Prediction ####
+source("R/match_analysis.R")
 
 # Define UI for app ####
 ui = shinyUI(

@@ -6,43 +6,24 @@ headers = {
     'x-rapidapi-key': "c5c5e223d6msh45c25cf6ec57892p1aa1d2jsn43203354fc24"
     }
 
-
-# Pull Matches (fixtures)
+# Pull Matches (fixtures) ####
 
 matches_url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
 
-laliga_querystring = {"league":"140","season":"2021"}
+# Query 2021 data
+laliga_2021_querystring = {"league":"140", "season":"2021"}
 
-response_matches = requests.request("GET", matches_url, headers=headers, params=laliga_querystring)
+laliga_2021_response_matches = requests.request("GET", matches_url, headers=headers, params=laliga_2021_querystring)
 
-matches_data = pd.json_normalize(json.loads(response_matches.text)["response"])
+laliga_2021_match_data = pd.json_normalize(json.loads(laliga_2021_response_matches.text)["response"])
 
-# Pull match statistics
+# Query 2020 data
+laliga_2020_querystring = {"league":"140", "season":"2020"}
 
-match_stats_url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
+laliga_2020_response_matches = requests.request("GET", matches_url, headers=headers, params=laliga_2020_querystring)
 
-laliga_querystring = {"league":"140","season":"2021"}
+laliga_2020_match_data = pd.json_normalize(json.loads(laliga_2020_response_matches.text)["response"])
 
-response_matches = requests.request("GET", matches_url, headers=headers, params=laliga_querystring)
+# Combine datasets
+laliga_match_data = pd.concat([laliga_2021_match_data,laliga_2020_match_data])
 
-matches_data = pd.json_normalize(json.loads(response_matches.text)["response"])
-
-# Pull Standings ####
-# 
-# standings_url = "https://api-football-v1.p.rapidapi.com/v3/standings"
-# 
-# response_standings = requests.request("GET", standings_url, headers=headers, params=laliga_querystring)
-# 
-# data = json.load(response_standings)
-# 
-# print(data.decode("utf-8"))
-# 
-# 
-# data = res.read()
-#
-# print(data.decode("utf-8"))
-
-
-# standings_data_1 = pd.json_normalize(json.loads(response_standings.text)["response"])
-# 
-# standings_data_2 =  pd.json_normalize(standings_data_1.loc[0,'league.standings']).apply(pd.Series)

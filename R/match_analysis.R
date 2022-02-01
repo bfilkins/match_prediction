@@ -1,12 +1,9 @@
-# Match data transform/tidy for analysis
+# Match data transform/tidy and feature engineering for analysis ####
 
-match_data <- py$matches_data %>%
-  mutate(date = date(fixture.date)) %>%
-  filter(date >= date("2020-1-1"),
-         date <= date("2022-1-23")
-         )
+match_data <- py$laliga_match_data %>%
+  mutate(date = date(fixture.date))
 
-game_lag <- 3
+game_lag <- 12
 
 match_data_seleted <- match_data %>%
   filter(fixture.status.short == "FT") %>%
@@ -46,35 +43,27 @@ prior_match_data <- match_team_long %>%
   inner_join(
     match_team_long %>%
       select(opposing_team_role = name, fixture.id, prior_games_goals, prior_games_conceded, prior_wins),
-    by = c("fixture.id"= "fixture.id", "opposing_team_role" = "opposing_team_role"))
+    by = c("fixture.id"= "fixture.id", "opposing_team_role" = "opposing_team_role")) %>%
+  mutate(target = reorder(as.factor(if_else(win_outcome_target == 1, "win", "not_win")),-win_outcome_target)) %>%
+  select(-win_outcome_target)
   
-
-  
-set.seed(1234)
-
-# Create match list to Build test and train data sets
+# Create match list to Build test and train data sets ####
 match_list <- prior_match_data %>%
   group_by(fixture.id) %>%
   summarise() 
 
-train_matches <- sample_n(match_list,100)
+train_matches <- sample_n(match_list,300)
 
-#Select Model data
+#Select model data ####
 model_data <- prior_match_data %>%
   select(
-    fixture.id, win_outcome_target, prior_games_goals.x, prior_games_conceded.x,
+    fixture.id, target, prior_games_goals.x, prior_games_conceded.x,
     prior_wins.x,prior_games_goals.y,prior_games_conceded.y,prior_wins.y
     )
-# Create train and test splits
-
-library(recipes)
-library(modeldata)
-library(themis)
-
+# Create balanced + normalized train and normalized test data sets ####
 
 train_data <- model_data %>%
   inner_join(train_matches, by = c("fixture.id" = "fixture.id")) %>%
-  mutate(target = as.factor(win_outcome_target)) %>%
   recipe(target ~ prior_games_goals.x + prior_games_conceded.x + 
            prior_wins.x+prior_games_goals.y + prior_games_conceded.y + 
            prior_wins.y, data = .) %>%
@@ -82,45 +71,92 @@ train_data <- model_data %>%
   step_normalize(all_predictors()) %>%
   prep(retain = TRUE)
 
-
 test_data <- model_data %>%
   anti_join(train_matches, by = c("fixture.id" = "fixture.id"))
 
-# For validation:
-train_normalize <- bake(train_data, new_data = test_data, all_predictors())
+test_normalize <- bake(train_data, new_data = test_data, all_predictors())
 
-set.seed(57974)
-nnet_fit <-
-  mlp(epochs = 100, hidden_units = 5, dropout = 0.1) %>%
-  set_mode("classification") %>% 
-  # Also set engine-specific `verbose` argument to prevent logging the results: 
-  set_engine("keras", verbose = 0) %>%
+# Fit Classification Models ####
+
+# Logistic Regression
+logistic_regression_model <-
+  logistic_reg(
+    mode = "classification",
+    engine = "glm"
+  ) %>%
   fit(target ~ ., data = bake(train_data, new_data = NULL))
 
-nnet_fit
-keras::install_keras()
 
-install.packages("keras")
-# Fit logistic regression
+# Gradient Boosting Trees
+boost_tree_model <-
+  boost_tree(
+    mode = "classification",
+    engine = "xgboost",
+    trees = 2000
+  ) %>%
+  fit(target ~ ., data = bake(train_data, new_data = NULL))
 
-model_linear <- train_data %>%
-  glm(
-    data = ., win_outcome_target ~ prior_games_goals.x + prior_games_conceded.x + 
-    prior_wins.x+prior_games_goals.y + prior_games_conceded.y + 
-    prior_wins.y, family=binomial(link='logit')
+# Random Forest
+random_forest_model <-
+  rand_forest(
+    mode = "classification",
+    engine = "ranger",
+    trees = 2000
+  ) %>%
+  fit(target ~ ., data = bake(train_data, new_data = NULL))
+
+# Multivariate adaptive regression splines
+mars <-
+  mars(
+    mode = "classification",
+    engine = "earth"
+  ) %>%
+  fit(target ~ ., data = bake(train_data, new_data = NULL))
+
+#Predict on holdout data ####
+
+predicted <- test_data %>%
+  bind_cols(
+    predict(logistic_regression_model, new_data = test_normalize, type = "prob") %>%
+      select(logistic_regression = .pred_win),
+    predict(boost_tree_model, new_data = test_normalize, type = "prob") %>%
+      select(xgboost = .pred_win),
+    predict(random_forest_model, new_data = test_normalize, type = "prob") %>%
+      select(random_forest = .pred_win),
+    predict(mars, new_data = test_normalize, type = "prob") %>%
+    select(mars = .pred_win)
     )
 
-model_stats <-model_linear %>%
-  tidy()
+predicted_long <- predicted %>%
+  pivot_longer(cols = c(xgboost, random_forest, mars, logistic_regression)) 
 
-test_data$score <- test_data %>%
-  predict(model_linear, newdata = .,  type = "response")
+# Model Performance ####
+output_auc <- predicted_long %>%
+  group_by(name) %>%
+  roc_auc(target, value)
 
-performance_plot <- test_data %>%
-  ggplot(aes(group = win_outcome_target,x = win_outcome_target, y = score)) +
-  geom_boxplot()+
-  geom_jitter(aes(color = score)) +
-  coord_flip() +
+prediction_roc <- predicted_long %>%
+  group_by(name) %>%
+  roc_curve(truth = target, value) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = name)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
   custom_theme()
+ggplotly(prediction_roc)
+
+# Plot predictions Performance ####
+
+performance_plot <- predicted_long %>%
+  ggplot(aes(group = target, x = target, y = value)) +
+  geom_violin() +
+  geom_jitter(aes(color = value)) +
+  coord_flip() +
+  custom_theme() +
+  facet_wrap(facets = "name")
 
 ggplotly(performance_plot)
+
+# Feature importance 
+log_reg_tidy <- logistic_regression_model %>%
+  tidy()

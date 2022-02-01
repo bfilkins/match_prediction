@@ -1,12 +1,12 @@
 #Light Colors
- # bg_color <- "#DEDEE0"
- # fg_color <- "#363636"
- # detail_color <- "#444444"
+  bg_color <- "#DEDEE0"
+  fg_color <- "#363636"
+  detail_color <- "#444444"
 
 #Dark Colors
-bg_color <- "#222222"
-fg_color <- "#DADDD8"
-detail_color <- "#F9F9F9"
+#bg_color <- "#222222"
+#fg_color <- "#DADDD8"
+#detail_color <- "#F9F9F9"
 
 colors <-   list(
   "red" = "#f50537",  # red
