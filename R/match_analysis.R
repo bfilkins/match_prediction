@@ -1,16 +1,8 @@
 # Match data transform/tidy and feature engineering for analysis ####
 
-match_data <- py$laliga_match_data %>%
-  mutate(date = date(fixture.date))
 
 game_lag <- 12
 
-match_data_seleted <- match_data %>%
-  filter(fixture.status.short == "FT") %>%
-  select(
-    fixture.id,fixture.status.long, score.fulltime.home, 
-    score.fulltime.away, goals.home, goals.away, 
-    teams.home.name,teams.away.name, date)
 
 match_team_long <- match_data_seleted %>% 
   pivot_longer(cols = c(teams.home.name,teams.away.name)) %>%
@@ -137,12 +129,14 @@ output_auc <- predicted_long %>%
 
 prediction_roc <- predicted_long %>%
   group_by(name) %>%
-  roc_curve(truth = target, value) %>%
+  roc_curve(truth = target, value) #%>%
+  ungroup() %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = name)) +
   geom_path() +
   geom_abline(lty = 3) +
-  coord_equal() +
-  custom_theme()
+  coord_equal() #+
+  #custom_theme()
+thematic::thematic_on()
 ggplotly(prediction_roc)
 
 # Plot predictions Performance ####
