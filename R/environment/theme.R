@@ -180,6 +180,7 @@ minimal_light <-
     out_theme
   }
 
+#Bootstrap theming 
 
 my_theme <- bs_theme(
   bg = bg_color,
@@ -188,3 +189,9 @@ my_theme <- bs_theme(
   secondary = detail_color,
   base_font =  "Monaco"
 )
+
+solar_theme <- bslib::bs_theme(
+  bg = "#002B36", fg = "#EEE8D5", primary = "#2AA198", 
+  base_font = font_google("Pacifico")
+)
+

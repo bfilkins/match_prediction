@@ -1,7 +1,7 @@
 #Interactive Layoout
 observeEvent(
   input$match_prediction_sidebar_button, {
-    shinyjs::toggle(id = "match_prediction_sidebar_button")
+    shinyjs::toggle(id = "match_prediction_sidebar")
   })
 
 # Match Long Data and Feature Engineering ####
@@ -170,45 +170,28 @@ roc_curve <- reactive(
       geom_path() +
       geom_abline(lty = 3) +
       coord_equal() +
-      custom_theme()
+      minimal_light()
     return(ggplotly(prediction_roc))
   }
 )
 
 output$roc_curve <- renderPlotly({roc_curve()})
 
-# # Model Performance ####
-# output_auc <- predicted_long %>%
-#   group_by(name) %>%
-#   roc_auc(target, value)
-# 
-# prediction_roc <- predicted_long %>%
-#   group_by(name) %>%
-#   roc_curve(truth = target, value) %>%
-#   ggplot(aes(x = 1 - specificity, y = sensitivity, color = name)) +
-#   geom_path() +
-#   geom_abline(lty = 3) +
-#   coord_equal() +
-#   custom_theme()
-# ggplotly(prediction_roc)
-# 
-# # Plot predictions Performance ####
-# 
-# performance_plot <- predicted_long %>%
-#   ggplot(aes(group = target, x = target, y = value)) +
-#   geom_violin() +
-#   geom_jitter(aes(color = value)) +
-#   coord_flip() +
-#   custom_theme() +
-#   facet_wrap(facets = "name")
-# 
-# ggplotly(performance_plot)
-
-# Feature importance 
-
-
-#extra ####
-# output$ball_y_density_plot <- renderPlotly({ball_y_density_plot()})
-# output$movement_plot <- renderPlotly({movement_plot()})
-# 
-# output$ball_x_density_plot <- renderPlotly({ball_x_density_plot()})
+modalVisible <- reactiveVal(FALSE)
+observeEvent(input$showModal, modalVisible(TRUE))
+observeEvent(input$hideModal, modalVisible(FALSE))
+output$modal <- renderReact({
+  Modal(isOpen = modalVisible(),
+        Stack(tokens = list(padding = "15px", childrenGap = "10px"),
+              div(style = list(display = "flex"),
+                  Text("Title", variant = "large"),
+                  div(style = list(flexGrow = 1)),
+                  IconButton.shinyInput("hideModal", iconProps = list(iconName = "Cancel")),
+              ),
+              div(
+                p("Explain Roc"),
+                p("Another paragraph.")
+              )
+        )
+  )}
+)

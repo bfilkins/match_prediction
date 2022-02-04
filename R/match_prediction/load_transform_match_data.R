@@ -1,6 +1,8 @@
-match_data <- py$laliga_match_data %>%
-  mutate(date = date(fixture.date))
+# match_data <- py$laliga_match_data %>%
+#  mutate(date = date(fixture.date))
 
+#saveRDS(match_data, "match_data.RDS")
+match_data <- readRDS("match_data.RDS")
 match_data_seleted <- match_data %>%
   filter(fixture.status.short == "FT") %>%
   select(
