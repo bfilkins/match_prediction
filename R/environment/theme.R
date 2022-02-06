@@ -28,11 +28,12 @@ colors <-   list(
 
 # font_add("Gotham Bold", "/Library/Fonts/AudiType-Normal.ttf")  # Use the actual file path
 # showtext_auto()
+font_selected <- font_google("Varela Round")
 
 custom_theme <- function(p) {
   ggplot2::theme_bw() +
     ggplot2::theme(
-      text = element_text(family = "Monaco", size = 14),
+      text = element_text(family = font_selected, size = 14),
       plot.background = element_rect(fill = "transparent", colour = NA),
       panel.background = element_rect(fill = "transparent", colour = NA),
       panel.border = element_rect(color = detail_color, size = .5),
@@ -66,7 +67,7 @@ my_theme <- bs_theme(
   fg = fg_color,
   primary = detail_color,
   secondary = detail_color,
-  base_font =  "Monaco"
+  base_font =  font_selected
 )
 
 solar_theme <- bslib::bs_theme(

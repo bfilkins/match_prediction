@@ -3,7 +3,7 @@
 div(
   width = 200,
   div(
-    tags$tbody("Analysis Parameters"),
+    tags$h4("Analysis Parameters", align = "ceneter"),
     fluidRow(
       div(
         style="display: inline-block; vertical-align:top; width: 100%;",

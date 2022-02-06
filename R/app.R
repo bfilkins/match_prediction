@@ -25,15 +25,15 @@ ui = shinyUI(
       ),
     theme = my_theme,
     navbarPage(
-      "football:",
+      "pitch prophet:",
       tabPanel(
-        "match",
+        "match outcome prediction",
         fluid = TRUE,
         sidebarLayout(
           sidebarPanel(
+            width = 3,
             div(
               id = "match_prediction_sidebar",
-              tags$tbody("Analysis Parameters"),
               source("R/match_prediction/match_prediction_sidebar.R", local = TRUE)$value,
               tagList(
                 PrimaryButton.shinyInput("showModal", text = "Show fuck", style = "background: grey; border: white"),
@@ -42,14 +42,14 @@ ui = shinyUI(
               )
             ),
           mainPanel(
+            width = 9,
             titlePanel(h1("Model Performance", align = "center")), 
             h4("ROC Curves and Model Performance Metrics", align = "center"), 
             column(width = 12,
             fluidRow(
               column(8,
             plotOutput(
-              outputId = "roc_curve",
-              width = "100%"
+              outputId = "roc_curve"
                 )),
             column(4,
             DT::dataTableOutput(
@@ -68,7 +68,7 @@ server <- function(input, output, session) {
   source("R/match_prediction/match_prediction_server.R", local = TRUE)$value
   }
 # Create Shiny app ----
-shinyApp(ui = ui, server = server)
+runGadget(ui, server, viewer = dialogViewer("Dialog Title", width = 1600, height = 1000))
 
 
 
