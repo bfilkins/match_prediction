@@ -32,7 +32,7 @@ colors <-   list(
 custom_theme <- function(p) {
   ggplot2::theme_bw() +
     ggplot2::theme(
-      text = element_text(family = "Monaco", size = 12),
+      text = element_text(family = "Monaco", size = 14),
       plot.background = element_rect(fill = "transparent", colour = NA),
       panel.background = element_rect(fill = "transparent", colour = NA),
       panel.border = element_rect(color = detail_color, size = .5),
@@ -53,132 +53,11 @@ custom_theme <- function(p) {
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.grid.minor.y = element_blank(),
-      panel.grid.major.y = element_blank()
+      panel.grid.major.y = element_blank(),
+      legend.direction = "horizontal",
+      legend.position = "top"
     )
 }
-
-minimal_light <-
-  function (default_text = 11,
-            orientation = c("x", "y", "xy",
-                            "none"))
-  {
-    orientation <- match.arg(orientation)
-    pcolors <- c(
-      black = "#222222",
-      `dark gray` = "#444444",
-      `medium gray` = "#888888",
-      `medium light gray` = "#dddddd",
-      `light gray` = "#eaeaea"
-    )
-    text_sizes <- c(
-      default = default_text,
-      title = default_text *
-        1.4,
-      subtitle = default_text * 1.25,
-      caption = default_text,
-      axis_title = default_text,
-      axis_text = default_text
-    )
-    line_size <- pt_to_mm(default_text) * 0.15
-    out_theme <-
-      theme_minimal() + theme(
-        text = element_text(
-          family = "sans",
-          color = pcolors[["dark gray"]],
-          size = text_sizes[["default"]]
-        ),
-        line = element_line(size = line_size),
-        plot.background = element_rect(color = NA,
-                                       fill = "white"),
-        plot.title = element_text(
-          family = "Verdana",
-          face = "bold",
-          size = text_sizes[["title"]],
-          color = pcolors[["black"]],
-          hjust = 0.5
-        ),
-        plot.subtitle = element_text(
-          size = text_sizes[["subtitle"]],
-          color = pcolors[["medium gray"]],
-          family = "sans",
-          face = "plain",
-          hjust = 0.5,
-          margin = margin(0, 0,
-                          text_sizes[["default"]], 0)
-        ),
-        plot.caption = element_text(
-          size = text_sizes[["caption"]],
-          color = pcolors[["medium gray"]],
-          margin = margin(text_sizes[["default"]],
-                          0, 0, 0)
-        ),
-        plot.title.position = "plot",
-        panel.spacing.x = unit(default_text *
-                                 2, "pt"),
-        panel.spacing.y = unit(default_text * 2,
-                               "pt"),
-        axis.title = element_text(color = pcolors[["medium gray"]],
-                                  size = text_sizes[["axis_title"]]),
-        axis.text = element_text(color = pcolors[["dark gray"]],
-                                 size = text_sizes[["axis_text"]]),
-        axis.line.x = element_blank(),
-        axis.line.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(
-          linetype = "dashed",
-          color = pcolors[["medium light gray"]],
-          size = line_size
-        ),
-        legend.direction = "horizontal",
-        legend.position = "top",
-        legend.margin = margin(0, 0, text_sizes[["default"]],
-                               0),
-        legend.title = element_text(face = "bold", size = text_sizes[["default"]]),
-        legend.text = element_text(size = text_sizes[["default"]]),
-        strip.background = element_blank(),
-        strip.text = element_text(
-          size = text_sizes[["default"]],
-          face = "italic",
-          lineheight = 0.9
-        ),
-        
-      )
-    if (orientation == "none") {
-      out_theme <- out_theme + theme(panel.grid.major = element_blank())
-    }
-    else if (orientation == "x") {
-      out_theme <-
-        out_theme + theme(
-          axis.line.x = element_line(color = pcolors[["medium light gray"]],
-                                     size = line_size * 3),
-          panel.grid.major.x = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          panel.grid.minor.y = element_blank(),
-          panel.grid.major.y = element_line(
-            color = pcolors[["light gray"]],
-            size = line_size,
-            linetype = "solid"
-          )
-        )
-    }
-    else if (orientation == "y") {
-      out_theme <-
-        out_theme + theme(
-          axis.line.y = element_line(color = pcolors[["medium light gray"]],
-                                     size = line_size * 3),
-          panel.grid.major.x = element_line(
-            color = pcolors[["light gray"]],
-            size = line_size,
-            linetype = "solid"
-          ),
-          panel.grid.minor.x = element_blank(),
-          panel.grid.minor.y = element_blank(),
-          panel.grid.major.y = element_blank(),
-        )
-    }
-    .suggest_dimensions(default_text)
-    out_theme
-  }
 
 #Bootstrap theming 
 

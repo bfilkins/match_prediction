@@ -14,11 +14,16 @@ div(
           min = 1,
           max = 20,
           step = 1,
-          animate = animationOptions(interval = 150, loop = TRUE)
+          animate = animationOptions(interval = 150, loop = TRUE)),
+          selectizeInput(
+            inputId = "models_selected",
+            label = "Prior Games",
+            choices = c("logistic regression","trees")
+           )
         )
       )
     )
   )
-)
+
 
 

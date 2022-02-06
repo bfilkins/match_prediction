@@ -170,12 +170,28 @@ roc_curve <- reactive(
       geom_path() +
       geom_abline(lty = 3) +
       coord_equal() +
-      minimal_light()
-    return(ggplotly(prediction_roc))
+      custom_theme()
+    return(prediction_roc)
   }
 )
 
-output$roc_curve <- renderPlotly({roc_curve()})
+output$roc_curve <- renderPlot({roc_curve()})
+
+performance_plot <- reactive(
+  {
+    prediction_auc <<- model_and_predict() %>%
+      group_by(name) %>%
+      yardstick::roc_auc(truth = target, value) %>%
+      select(Model = name, `Area Under Curve` = .estimate) %>%
+      DT::datatable(options = list(dom = 't',  style = "font-size:80%")) %>%
+      formatStyle("Model", target = 'row',  backgroundColor = bg_color, color = fg_color) %>%
+      formatRound("Area Under Curve", digits = 3)
+    
+    return(prediction_auc)
+  }
+)
+
+output$performance_plot <- DT::renderDataTable(performance_plot())
 
 modalVisible <- reactiveVal(FALSE)
 observeEvent(input$showModal, modalVisible(TRUE))
