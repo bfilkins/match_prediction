@@ -18,7 +18,8 @@ div(
           selectizeInput(
             inputId = "models_selected",
             label = "Prior Games",
-            choices = c("logistic regression","trees")
+            choices = c("logistic regression","trees"),
+            multiple = TRUE
            )
         )
       )

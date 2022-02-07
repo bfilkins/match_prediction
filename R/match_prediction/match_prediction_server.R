@@ -117,7 +117,7 @@ model_and_predict <- reactive(
       fit(target ~ ., data = bake(train_data, new_data = NULL))
 
     # Random Forest
-    random_forest_model <-
+    random_forest_model <<-
       rand_forest(
         mode = "classification",
         engine = "ranger",
@@ -135,7 +135,7 @@ model_and_predict <- reactive(
 
     #Predict on holdout data ####
 
-    predicted <- test_data %>%
+    predicted <<- test_data %>%
       bind_cols(
         predict(logistic_regression_model, new_data = test_normalize, type = "prob") %>%
           select(logistic_regression = .pred_win),
@@ -196,6 +196,7 @@ output$performance_plot <- DT::renderDataTable(performance_plot())
 modalVisible <- reactiveVal(FALSE)
 observeEvent(input$showModal, modalVisible(TRUE))
 observeEvent(input$hideModal, modalVisible(FALSE))
+
 output$modal <- renderReact({
   Modal(isOpen = modalVisible(),
         Stack(tokens = list(padding = "15px", childrenGap = "10px"),
@@ -203,6 +204,27 @@ output$modal <- renderReact({
                   Text("Title", variant = "large"),
                   div(style = list(flexGrow = 1)),
                   IconButton.shinyInput("hideModal", iconProps = list(iconName = "Cancel")),
+              ),
+              div(
+                p("Explain Roc"),
+                p("Another paragraph.")
+              )
+        )
+  )}
+)
+
+
+explain_roc_modalVisible <- reactiveVal(FALSE)
+observeEvent(input$show_explain_roc, explain_roc_modalVisible(TRUE))
+observeEvent(input$hide_explain_roc, explain_roc_modalVisible(FALSE))
+
+output$explain_roc <- renderReact({
+  Modal(isOpen = explain_roc_modalVisible(),
+        Stack(tokens = list(padding = "15px", childrenGap = "10px"),
+              div(style = list(display = "flex"),
+                  Text("Title", variant = "large"),
+                  div(style = list(flexGrow = 1)),
+                  IconButton.shinyInput("hide_explain_roc", iconProps = list(iconName = "Cancel")),
               ),
               div(
                 p("Explain Roc"),

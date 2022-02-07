@@ -35,12 +35,13 @@ ui = shinyUI(
             div(
               id = "match_prediction_sidebar",
               source("R/match_prediction/match_prediction_sidebar.R", local = TRUE)$value,
+              
               tagList(
                 PrimaryButton.shinyInput("showModal", text = "Show fuck", style = "background: grey; border: white"),
                 reactOutput("modal")
               )
-              )
-            ),
+              
+              )),
           mainPanel(
             width = 9,
             titlePanel(h1("Model Performance", align = "center")), 
@@ -50,7 +51,13 @@ ui = shinyUI(
               column(8,
             plotOutput(
               outputId = "roc_curve"
-                )),
+                ),
+            
+            tagList(
+              PrimaryButton.shinyInput("show_explain_roc", text = "definitions", style = "background: grey; border: white"),
+              reactOutput("explain_roc")
+              
+            )),
             column(4,
             DT::dataTableOutput(
               outputId = "performance_plot")
