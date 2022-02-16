@@ -7,5 +7,5 @@ match_data_seleted <- match_data %>%
   filter(fixture.status.short == "FT") %>%
   select(
     fixture.id,fixture.status.long, score.fulltime.home, 
-    score.fulltime.away, goals.home, goals.away, 
-    teams.home.name,teams.away.name, date)
+    score.fulltime.away, goals.home, goals.away, teams.home.id,
+       teams.home.name, teams.away.id, teams.away.name, date)

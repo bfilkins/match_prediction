@@ -62,13 +62,13 @@ custom_theme <- function(p) {
 
 #Bootstrap theming 
 
-my_theme <- bs_theme(
+my_theme <- bs_add_variables( bs_theme(
   bg = bg_color,
   fg = fg_color,
   primary = detail_color,
   secondary = detail_color,
   base_font =  font_selected
-)
+),"border-color" = detail_color)
 
 solar_theme <- bslib::bs_theme(
   bg = "#002B36", fg = "#EEE8D5", primary = "#2AA198", 

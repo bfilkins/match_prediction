@@ -1,7 +1,7 @@
 
 # Packages ####
 source("R/environment/packages.R")
-#source_python("Python/environment/packages.py")
+source_python("Python/environment/packages.py")
 
 # Global ####
 source("R/environment/globals.R")
@@ -26,6 +26,13 @@ ui = shinyUI(
     theme = my_theme,
     navbarPage(
       "pitch prophet:",
+      tabPanel(
+        "Team Stats",
+        fluidRow( 
+          style = "padding: 10px",
+          column( 6, div(htmlOutput("logo_home_team", style = "text-align: center; display: block; margin-left: auto; margin-right: auto; padding: 15px;"))),
+          column( 6, div(htmlOutput("logo_away_team", style = "text-align: center; display: block; margin-left: auto; margin-right: auto; padding: 15px;")))
+        )),
       tabPanel(
         "match outcome prediction",
         fluid = TRUE,
@@ -54,19 +61,21 @@ ui = shinyUI(
                 ),
             
             tagList(
-              PrimaryButton.shinyInput("show_explain_roc", text = "definitions", style = "background: grey; border: white"),
+              PrimaryButton.shinyInput("show_explain_roc", text = "definitions", style = "background: grey; border: white; align-text: center;"),
               reactOutput("explain_roc")
               
             )),
             column(4,
+                   style = "align-text: ceneter",
             DT::dataTableOutput(
               outputId = "performance_plot")
-            ))))
+            )))
+          )))
           )
         )
       )
-    )
-  )
+
+  
 
 thematic_shiny()
 

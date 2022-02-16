@@ -233,3 +233,11 @@ output$explain_roc <- renderReact({
         )
   )}
 )
+
+home_src <- "https://media.api-sports.io/football/teams/541.png"
+
+output$logo_home_team<-renderText({c('<img src="',home_src,'">')})
+
+away_src <- "https://media.api-sports.io/football/teams/529.png"
+
+output$logo_away_team<-renderText({c('<img src="',away_src,'">')})
