@@ -1,7 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
-
+*.parquet
 # Session Data files
 .RData
 
