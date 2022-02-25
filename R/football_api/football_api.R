@@ -55,7 +55,7 @@ match_stats_data <- match_stats_raw$response %>%
 return(match_stats_data)
 }
 
-test_stats <- get_match_stats(test_match)
+# test_stats <- get_match_stats(test_match)
 
 
 # Query Match Data and Transform Long 

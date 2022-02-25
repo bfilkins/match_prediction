@@ -148,7 +148,7 @@ predicted.0 <- bind_rows(
 
 predicted <- predicted.0 %>%
   mutate(
-    tie = as.factor(if_else(target_outcome == "tie", 1,0)),
+    tie = as.factor(if_else(target_outcome == "tie", 1,0), levels = c(1,0)),
     win_home = as.factor(if_else(target_outcome == "home_win", 1,0)),
     away_win = as.factor((if_else(target_outcome == "away_win", 1,0))
   ))
@@ -160,6 +160,7 @@ tie_prediction_roc <- predicted %>%
   yardstick::roc_curve(truth = tie, .pred_tie) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
     geom_path() +
+  ggtitle("Tie")+
     geom_abline(lty = 3) +
     coord_equal() + 
   theme(legend.position = "none")
@@ -169,6 +170,7 @@ home_win_prediction_roc <- predicted %>%
   yardstick::roc_curve(truth = win_home, .pred_home_win) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
   geom_path() +
+  ggtitle("Home Win")+
   geom_abline(lty = 3) +
   coord_equal() + 
   theme(legend.position = "none")
@@ -178,6 +180,7 @@ away_win_prediction_roc <- predicted %>%
   yardstick::roc_curve(truth = away_win, .pred_away_win) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
   geom_path() +
+  ggtitle("Away Win")+
   geom_abline(lty = 3) +
   coord_equal()
 
@@ -186,4 +189,4 @@ row_legend <- cowplot::get_legend(away_win_prediction_roc)
 away_win_prediction_roc <- away_win_prediction_roc +
   theme(legend.position = "none")
   
-cowplot::plot_grid(cowplot::plot_grid(home_win_prediction_roc,tie_prediction_roc,away_win_prediction_roc, nrow = 1), row_legend, nrow= 2)
+cowplot::plot_grid(cowplot::plot_grid(home_win_prediction_roc,tie_prediction_roc,away_win_prediction_roc, nrow = 1), row_legend, nrow= 1, rel_widths = c(9,1))
