@@ -101,9 +101,9 @@ model_and_predict <- reactive(
     # Logistic Regression
     logistic_regression_model <-
       logistic_reg(
-        mode = "classification",
-        engine = "glm"
+        mode = "classification"
       ) %>%
+      set_engine("glm") %>%
       fit(target ~ ., data = bake(train_data, new_data = NULL))
 
 
@@ -111,27 +111,27 @@ model_and_predict <- reactive(
     boost_tree_model <-
       boost_tree(
         mode = "classification",
-        engine = "xgboost",
         trees = 2000
       ) %>%
+      set_engine("xgboost") %>%
       fit(target ~ ., data = bake(train_data, new_data = NULL))
 
     # Random Forest
     random_forest_model <<-
       rand_forest(
         mode = "classification",
-        engine = "ranger",
         trees = 2000
       ) %>%
+      set_engine("ranger") %>%
       fit(target ~ ., data = bake(train_data, new_data = NULL))
 
     # Multivariate adaptive regression splines
-    mars <-
-      mars(
-        mode = "classification",
-        engine = "earth"
-      ) %>%
-      fit(target ~ ., data = bake(train_data, new_data = NULL))
+    # mars <-
+    #   mars(
+    #     mode = "classification"
+    #   ) %>%
+    #   set_engine("earth") %>%
+    #   fit(target ~ ., data = bake(train_data, new_data = NULL))
 
     #Predict on holdout data ####
 
@@ -142,13 +142,13 @@ model_and_predict <- reactive(
         predict(boost_tree_model, new_data = test_normalize, type = "prob") %>%
           select(xgboost = .pred_win),
         predict(random_forest_model, new_data = test_normalize, type = "prob") %>%
-          select(random_forest = .pred_win),
-        predict(mars, new_data = test_normalize, type = "prob") %>%
-          select(mars = .pred_win)
+          select(random_forest = .pred_win)#,
+        # predict(mars, new_data = test_normalize, type = "prob") %>%
+        #   select(mars = .pred_win)
       )
 
     predicted_long <<- predicted %>%
-      pivot_longer(cols = c(xgboost, random_forest, mars, logistic_regression))
+      pivot_longer(cols = c(xgboost, random_forest, logistic_regression))
 
     return(predicted_long)
   }

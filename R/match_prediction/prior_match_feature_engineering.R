@@ -1,4 +1,5 @@
 #Create prior performance for home and away matches for each team going into a match #### 
+games_back <- 8 
 
 new_match_structure.0 <-  match_data_seleted %>%
   pivot_longer(cols = c( "teams.home.id", "teams.away.id")) %>%
@@ -19,19 +20,19 @@ new_match_structure.0 <-  match_data_seleted %>%
   mutate(
     lag_sum_goals_scored = rollsum(
       target_team_goals,
-      k = 6,
+      k = games_back,
       align = "right",
       fill = NA
     ),
     lag_sum_goals_conceded = rollsum(
       opposing_team_goals,
-      k = 6,
+      k = games_back,
       align = "right",
       fill = NA
     ),
     lag_sum_wins = rollsum(
       win_outcome_target,
-      k = 6,
+      k = games_back,
       align = "right",
       fill = NA
     )
@@ -101,9 +102,8 @@ test_normalize <- bake(train_data, new_data = test_data, all_predictors()) %>%
 
 # Multi-nomial Regression
 multinomial_regression <-
-  multinom_reg(
-    engine = "nnet"
-  ) %>%
+  multinom_reg() %>%
+  set_engine("nnet") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
 
 
@@ -111,29 +111,79 @@ multinomial_regression <-
 boost_tree_model <-
   boost_tree(
     mode = "classification",
-    engine = "xgboost",
     trees = 2000
   ) %>%
+  set_engine("xgboost") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
 
 # Random Forest
 random_forest_model <<-
   rand_forest(
     mode = "classification",
-    engine = "ranger",
     trees = 2000
   ) %>%
+  set_engine("ranger") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
 
 
 #Predict on holdout data ####
 
-predicted <- bind_rows(
-  predict(multinomial_regression, new_data = test_normalize, type = "prob") %>%
-    mutate(model = "multinomial regression"),
-  predict(boost_tree_model, new_data = test_normalize, type = "prob") %>%
-    mutate(model = "boosted trees"),
-  predict(random_forest_model, new_data = test_normalize, type = "prob") %>%
+predicted.0 <- bind_rows(
+  bind_cols(
+    test_data %>% select(fixture.id,target_outcome),
+    predict(multinomial_regression, new_data = test_normalize, type = "prob") %>%
+    mutate(model = "multinomial regression")
+    ),
+  bind_cols(
+    test_data %>% select(fixture.id,target_outcome),
+    predict(boost_tree_model, new_data = test_normalize, type = "prob") %>%
+    mutate(model = "boosted trees")
+    ),
+  bind_cols(
+    test_data %>% select(fixture.id,target_outcome),
+    predict(random_forest_model, new_data = test_normalize, type = "prob") %>%
     mutate(model = "random forest")
+    )
   )
 
+predicted <- predicted.0 %>%
+  mutate(
+    tie = as.factor(if_else(target_outcome == "tie", 1,0)),
+    win_home = as.factor(if_else(target_outcome == "home_win", 1,0)),
+    away_win = as.factor((if_else(target_outcome == "away_win", 1,0))
+  ))
+
+
+
+tie_prediction_roc <- predicted %>%
+  group_by(model) %>%
+  yardstick::roc_curve(truth = tie, .pred_tie) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+    geom_path() +
+    geom_abline(lty = 3) +
+    coord_equal() + 
+  theme(legend.position = "none")
+
+home_win_prediction_roc <- predicted %>%
+  group_by(model) %>%
+  yardstick::roc_curve(truth = win_home, .pred_home_win) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() + 
+  theme(legend.position = "none")
+
+away_win_prediction_roc <- predicted %>%
+  group_by(model) %>%
+  yardstick::roc_curve(truth = away_win, .pred_away_win) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal()
+
+row_legend <- cowplot::get_legend(away_win_prediction_roc)
+
+away_win_prediction_roc <- away_win_prediction_roc +
+  theme(legend.position = "none")
+  
+cowplot::plot_grid(cowplot::plot_grid(home_win_prediction_roc,tie_prediction_roc,away_win_prediction_roc, nrow = 1), row_legend, nrow= 2)

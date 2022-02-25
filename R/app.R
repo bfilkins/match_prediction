@@ -12,13 +12,14 @@ source("R/environment/theme.R")
 # Load Data ####
 #source_python("Python/query/matches_api_query.py")
 source("R/match_prediction/load_transform_match_data.R")
+source("R/football_api/query_match_statistics.R")
 
 # Create App to Model Match Prediction ####
 # Define UI for app ####
 
 ui = shinyUI(
   fluidPage(
-    useShinyjs(),
+    #useShinyjs(),
     tags$head(
       tags$style(
         source("R/environment/html.R", local = TRUE)$value)
