@@ -49,7 +49,6 @@ new_match_structure.0 <-  match_data_seleted %>%
   ungroup() %>%
   mutate_if( is.numeric ,.funs = na.locf, na.rm = FALSE) %>%
   drop_na()
-{.}
 
 #Join features back to match level data for home and away teams ####
 new_match_structure.1 <- match_data_seleted %>%
@@ -70,6 +69,36 @@ new_match_structure.1 <- match_data_seleted %>%
       )
     )
 
+
+# Add match team level features ####
+
+match_stats_wide <- match_statistics  %>%
+  mutate(
+    fix = fix,
+    clean_name = remove_non_alpha(type,""),
+    clean_value = as.numeric(remove_non_alpha(value,""))
+  ) %>%
+  unnest(team) %>%
+  pivot_wider(id_cols = c(fix, id) , names_from = clean_name, values_from = clean_value, values_fill = 0) %>%
+  inner_join(
+    match_data %>% 
+      mutate(
+        fix = as.character(fixture.id),
+        date = date(fixture.date)
+      ) %>%
+      select(fix, date),
+    by = c("fix" = "fix")
+  ) %>%
+  mutate(id = as.character(id)) %>%
+  group_by(id) %>%
+  arrange(date) %>%
+  mutate_if(is.numeric, lag_exclude_current) %>%
+  ungroup() %>%
+  select(-date) %>%
+  drop_na()
+
+#Join match statistics data ####
+# Need to build this out still
 
 # Create match list to Build test and train data sets ####
 match_list <- new_match_structure.1  %>% 
@@ -148,10 +177,10 @@ predicted.0 <- bind_rows(
 
 predicted <- predicted.0 %>%
   mutate(
-    tie = as.factor(if_else(target_outcome == "tie", 1,0), levels = c(1,0)),
-    win_home = as.factor(if_else(target_outcome == "home_win", 1,0)),
-    away_win = as.factor((if_else(target_outcome == "away_win", 1,0))
-  ))
+    tie = factor(if_else(target_outcome == "tie", 1, 0), levels = c(1,0)),
+    win_home = factor(if_else(target_outcome == "home_win", 1,0), levels = c(1,0)),
+    away_win = factor(if_else(target_outcome == "away_win", 1,0), levels = c(1,0))
+  )
 
 
 

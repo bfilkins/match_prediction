@@ -13,6 +13,8 @@ source("R/environment/theme.R")
 #source_python("Python/query/matches_api_query.py")
 source("R/match_prediction/load_transform_match_data.R")
 source("R/football_api/query_match_statistics.R")
+source("R/match_prediction/prior_match_feature_engineering.R")
+
 
 # Create App to Model Match Prediction ####
 # Define UI for app ####
