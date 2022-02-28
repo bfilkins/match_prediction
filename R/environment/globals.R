@@ -9,7 +9,7 @@ remove_non_alpha <- function(x,y) {gsub("[^[:alnum:]]", paste(y), str_trim(x))}
 lag_exclude_current <- function(x) {
   rollsum(
     x,
-    k = 3,
+    k = 3, # <- change here to use shiny input
     align = "right", 
     fill = NA
   ) - x

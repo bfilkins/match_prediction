@@ -9,7 +9,7 @@ source("R/environment/globals.R")
 # Theme ####
 source("R/environment/theme.R")
 
-# Load Data ####
+# Load Data #### (break out load and query)
 #source_python("Python/query/matches_api_query.py")
 source("R/match_prediction/load_transform_match_data.R")
 source("R/football_api/query_match_statistics.R")
