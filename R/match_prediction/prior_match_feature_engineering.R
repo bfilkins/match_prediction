@@ -1,4 +1,4 @@
-#Create prior performance for home and away matches for each team going into a match #### 
+# Create prior performance for home and away matches for each team going into a match #### 
 games_back <- 8 
 
 new_match_structure.0 <-  match_data_seleted %>%
@@ -50,7 +50,7 @@ new_match_structure.0 <-  match_data_seleted %>%
   mutate_if( is.numeric ,.funs = na.locf, na.rm = FALSE) %>%
   drop_na()
 
-#Join features back to match level data for home and away teams ####
+# Join features back to match level data for home and away teams ####
 new_match_structure.1 <- match_data_seleted %>%
   inner_join(
     new_match_structure.0 %>%
@@ -97,7 +97,7 @@ match_stats_wide <- match_statistics  %>%
   select(-date) %>%
   drop_na()
 
-#Join match statistics data ####
+# Join match statistics data ####
 # Need to build this out still
 
 # Create match list to Build test and train data sets ####
@@ -134,7 +134,6 @@ multinomial_regression <-
   multinom_reg() %>%
   set_engine("nnet") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
-
 
 # Gradient Boosting Trees
 boost_tree_model <-

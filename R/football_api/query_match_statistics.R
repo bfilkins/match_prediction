@@ -1,4 +1,13 @@
-# query uncollected match statistic data for matches in model data
+# load base match data from py environment into R and save locally ####
+
+# match_data <- py$laliga_match_data %>%
+#  mutate(date = date(fixture.date))
+
+#saveRDS(match_data, "match_data.RDS")
+
+
+# query uncollected match statistic data for matches in model data ####
+# get all matches list ####
 
 # fixtures <- match_data %>%
 #   mutate(fix = as.character(fixture.id)) %>%
@@ -36,5 +45,6 @@ match_statistics <- read_parquet("match_stats.parquet")
 
 # Write to database. Eventually replace with AWS
 # write_parquet(match_statistics,"match_stats.parquet")
+
 
 

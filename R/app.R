@@ -9,19 +9,23 @@ source("R/environment/globals.R")
 # Theme ####
 source("R/environment/theme.R")
 
-# Load Data #### (break out load and query)
+# Query Data #### (uses API)
 #source_python("Python/query/matches_api_query.py")
+#source("R/football_api/query_match_statistics.R")
+
+# Load Data #### (loads local data)
 source("R/match_prediction/load_transform_match_data.R")
-source("R/football_api/query_match_statistics.R")
+
+# non-app server script for development (move all this into server)
 source("R/match_prediction/prior_match_feature_engineering.R")
 
 
 # Create App to Model Match Prediction ####
-# Define UI for app ####
+
+# Define UI for app
 
 ui = shinyUI(
   fluidPage(
-    #useShinyjs(),
     tags$head(
       tags$style(
         source("R/environment/html.R", local = TRUE)$value)
