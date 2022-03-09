@@ -1,5 +1,5 @@
 # Create prior performance for home and away matches for each team going into a match #### 
-games_back <- 8 
+games_back <- 12 
 
 new_match_structure.0 <-  match_data_seleted %>%
   pivot_longer(cols = c( "teams.home.id", "teams.away.id")) %>%
@@ -62,11 +62,15 @@ new_match_structure.1 <- match_data_seleted %>%
       select(value, fixture.id, awayteams_goals_home = prior_games_goals_teams.home.id, awayteams_goals_away = prior_games_goals_teams.away.id),
     by = c("teams.away.id" = "value", "fixture.id" = "fixture.id")) %>%
   mutate(
-    target_outcome = case_when(
-      goals.home > goals.away ~ "home_win",
-      goals.away > goals.home ~ "away_win",
-      goals.home == goals.away ~ "tie"
-      )
+    target_outcome = factor(
+      case_when(
+        goals.home > goals.away ~ "home_win",
+        goals.away > goals.home ~ "away_win",
+        goals.home == goals.away ~ "tie")
+      ),
+      fix = as.character(fixture.id),
+      home_id = as.character(teams.home.id),
+      away_id = as.character(teams.away.id)
     )
 
 
@@ -79,7 +83,12 @@ match_stats_wide <- match_statistics  %>%
     clean_value = as.numeric(remove_non_alpha(value,""))
   ) %>%
   unnest(team) %>%
-  pivot_wider(id_cols = c(fix, id) , names_from = clean_name, values_from = clean_value, values_fill = 0) %>%
+  pivot_wider(
+    id_cols = c(fix, id), 
+    names_from = clean_name, 
+    values_from = clean_value, 
+    values_fill = 0
+    ) %>%
   inner_join(
     match_data %>% 
       mutate(
@@ -98,25 +107,31 @@ match_stats_wide <- match_statistics  %>%
   drop_na()
 
 # Join match statistics data ####
-# Need to build this out still
+
+match_model_data <- new_match_structure.1 %>%
+  inner_join(match_stats_wide %>% rename_all(paste0,"_home"), by = c("fix" = "fix_home", "home_id" = "id_home")) %>%
+  inner_join(match_stats_wide  %>% rename_all(paste0,"_away"), by = c("fix" = "fix_away", "away_id" = "id_away")) %>%
+  select(-fix, -away_id, -home_id)
+
 
 # Create match list to Build test and train data sets ####
-match_list <- new_match_structure.1  %>% 
+match_list <- match_model_data  %>% 
   group_by(fixture.id) %>%
   summarise()
 
 train_matches <- sample_n(match_list,300)
 
 # #Select model data ####
-model_data <- new_match_structure.1 %>%
-  select(fixture.id, 11:16)
+model_data <- match_model_data %>%
+  select(fixture.id, 12:48)
 
 # Create balanced + normalized train and normalized test data sets #### 
-# abstract this section so features are list input
+# next steps; abstract this section so features are list input
 
 train_data <- model_data %>%
   inner_join(train_matches, by = c("fixture.id" = "fixture.id")) %>%
-    recipe(target_outcome ~ hometeams_goals_home + hometeams_goals_away + awayteams_goals_home + awayteams_goals_away, data = .) %>%
+  select(-fixture.id) %>%
+    recipe(target_outcome ~ ., data = .) %>%
   step_smote(target_outcome) %>%
   step_normalize(all_predictors()) %>%
   prep(retain = TRUE)
@@ -150,8 +165,12 @@ random_forest_model <<-
     mode = "classification",
     trees = 2000
   ) %>%
-  set_engine("ranger") %>%
+  set_engine("randomForest") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
+
+importance <- rownames_to_column(random_forest_model$fit$importance)
+importance <- random_forest_model$fit$importance %>%
+  unnest()
 
 
 #Predict on holdout data ####
@@ -160,42 +179,64 @@ predicted.0 <- bind_rows(
   bind_cols(
     test_data %>% select(fixture.id,target_outcome),
     predict(multinomial_regression, new_data = test_normalize, type = "prob") %>%
-    mutate(model = "multinomial regression")
+    mutate(model = "multinomial regression"),
+    predict(multinomial_regression, new_data = test_normalize)
     ),
   bind_cols(
     test_data %>% select(fixture.id,target_outcome),
     predict(boost_tree_model, new_data = test_normalize, type = "prob") %>%
-    mutate(model = "boosted trees")
+    mutate(model = "boosted trees"),
+    predict(boost_tree_model, new_data = test_normalize)
     ),
   bind_cols(
     test_data %>% select(fixture.id,target_outcome),
     predict(random_forest_model, new_data = test_normalize, type = "prob") %>%
-    mutate(model = "random forest")
+    mutate(model = "random forest"),
+    predict(random_forest_model, new_data = test_normalize)
     )
   )
 
 predicted <- predicted.0 %>%
   mutate(
     tie = factor(if_else(target_outcome == "tie", 1, 0), levels = c(1,0)),
-    win_home = factor(if_else(target_outcome == "home_win", 1,0), levels = c(1,0)),
+    home_win = factor(if_else(target_outcome == "home_win", 1,0), levels = c(1,0)),
     away_win = factor(if_else(target_outcome == "away_win", 1,0), levels = c(1,0))
   )
 
+# Performance Stats Summary for model evaluation ####
+performance_stats <- predicted %>%
+  group_by(model) %>%
+  nest(
+    class_data = c(fixture.id, target_outcome,.pred_class),
+    home_win_data = c(home_win, .pred_home_win),
+    away_win_data = c(away_win,.pred_away_win),
+    tie_data = c(tie, .pred_tie)
+    ) %>%
+  mutate(
+    accuracy = map(class_data, .f = yardstick::accuracy, truth = target_outcome, .pred_class),
+    F1_score = map(class_data, .f = yardstick::f_meas, truth = target_outcome, .pred_class),
+    recall = map(class_data, .f = yardstick::recall, truth = target_outcome, .pred_class),
+    home_win_auc = map(home_win_data, .f = yardstick::roc_auc, truth = home_win, .pred_home_win),
+    away_win_auc = map(away_win_data, .f = yardstick::roc_auc, truth = away_win, .pred_away_win),
+    tie_auc = map(tie_data, .f = yardstick::roc_auc, truth = tie, .pred_tie)
+  ) #%>%
+  #unnest_wider(accuracy)
 
-
+#Visualize ROC
+ 
 tie_prediction_roc <- predicted %>%
   group_by(model) %>%
   yardstick::roc_curve(truth = tie, .pred_tie) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
-    geom_path() +
+  geom_path() +
   ggtitle("Tie")+
-    geom_abline(lty = 3) +
-    coord_equal() + 
+  geom_abline(lty = 3) +
+  coord_equal() + 
   theme(legend.position = "none")
 
 home_win_prediction_roc <- predicted %>%
   group_by(model) %>%
-  yardstick::roc_curve(truth = win_home, .pred_home_win) %>%
+  yardstick::roc_curve(truth = home_win, .pred_home_win) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
   geom_path() +
   ggtitle("Home Win")+
@@ -217,4 +258,5 @@ row_legend <- cowplot::get_legend(away_win_prediction_roc)
 away_win_prediction_roc <- away_win_prediction_roc +
   theme(legend.position = "none")
   
+thematic_on()
 cowplot::plot_grid(cowplot::plot_grid(home_win_prediction_roc,tie_prediction_roc,away_win_prediction_roc, nrow = 1), row_legend, nrow= 1, rel_widths = c(9,1))

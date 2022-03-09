@@ -19,7 +19,6 @@ source("R/match_prediction/load_transform_match_data.R")
 # non-app server script for development (move all this into server)
 source("R/match_prediction/prior_match_feature_engineering.R")
 
-
 # Create App to Model Match Prediction ####
 
 # Define UI for app

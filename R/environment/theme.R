@@ -37,7 +37,7 @@ custom_theme <- function(p) {
       plot.background = element_rect(fill = "transparent", colour = NA),
       panel.background = element_rect(fill = "transparent", colour = NA),
       panel.border = element_rect(color = detail_color, size = .5),
-      plot.title = element_text(color = detail_color),
+      plot.title = element_text(color = detail_color, hjust = 0.5),
       plot.subtitle = element_text(color = detail_color),
       axis.title.x = element_text(color = detail_color),
       axis.title.y = element_text(color = detail_color),

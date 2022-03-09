@@ -24,6 +24,13 @@ laliga_2020_response_matches = requests.request("GET", matches_url, headers=head
 
 laliga_2020_match_data = pd.json_normalize(json.loads(laliga_2020_response_matches.text)["response"])
 
+# Query 2019 data
+laliga_2019_querystring = {"league":"140", "season":"2019"}
+
+laliga_2019_response_matches = requests.request("GET", matches_url, headers=headers, params=laliga_2019_querystring)
+
+laliga_2019_match_data = pd.json_normalize(json.loads(laliga_2019_response_matches.text)["response"])
+
 # Combine datasets
-laliga_match_data = pd.concat([laliga_2021_match_data,laliga_2020_match_data])
+laliga_match_data = pd.concat([laliga_2021_match_data, laliga_2020_match_data, laliga_2019_match_data])
 
