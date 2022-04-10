@@ -20,7 +20,7 @@ source("R/match_prediction/load_transform_match_data.R")
 # non-app server script for development (move all this into server)
 source("R/match_prediction/prior_match_feature_engineering.R")
 
-# Create App to Model Match Prediction ####
+# Create App to explore modeling match outcome predictions using prior match data ####
 
 # Define UI for app
 
@@ -51,7 +51,7 @@ ui = shinyUI(
               source("R/match_prediction/match_prediction_sidebar.R", local = TRUE)$value,
               
               tagList(
-                PrimaryButton.shinyInput("showModal", text = "Show fuck", style = "background: grey; border: white"),
+                PrimaryButton.shinyInput("showModal", text = "Show modal", style = "background: grey; border: white"),
                 reactOutput("modal")
               )
               
