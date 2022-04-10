@@ -3,15 +3,16 @@
 source("R/environment/packages.R")
 source_python("Python/environment/packages.py")
 
-# Global ####
+# Global and Functions ####
 source("R/environment/globals.R")
+source("R/environment/define_query_functions.R")
+source_python("Python/environment/define_query_functions.py")
 
 # Theme ####
 source("R/environment/theme.R")
 
-# Query Data #### (uses API)
-#source_python("Python/query/matches_api_query.py")
-#source("R/football_api/query_match_statistics.R")
+# Query and Save Data #### (this will all be modified when it points at AWS)
+source("R/environment/query_fixtures_and_statistics.R")
 
 # Load Data #### (loads local data)
 source("R/match_prediction/load_transform_match_data.R")
