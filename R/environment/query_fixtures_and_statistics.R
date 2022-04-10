@@ -63,7 +63,7 @@ new_match_statistics <- fixtures %>%
   unnest() %>%
   filter(!is.na(value))
 
-# Need to fix: this anti join is redundant so I don't get recursive shit ####
+# Need to fix: this anti join is redundant so I don't get recursive stuff ####
 # is this the right approach here?
 # match_statistics <- match_statistics %>%
 #   bind_rows(

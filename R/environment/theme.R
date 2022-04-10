@@ -3,10 +3,6 @@
   fg_color <- "#363636"
   detail_color <- "#444444"
 
-#Dark Colors
-#bg_color <- "#222222"
-#fg_color <- "#DADDD8"
-#detail_color <- "#F9F9F9"
 
 colors <-   list(
   "red" = "#f50537",  # red
@@ -26,8 +22,7 @@ colors <-   list(
   "black" = "#000000"  # black
 )
 
-# font_add("Gotham Bold", "/Library/Fonts/AudiType-Normal.ttf")  # Use the actual file path
-# showtext_auto()
+
 font_selected <- font_google("Varela Round")
 
 custom_theme <- function(p) {

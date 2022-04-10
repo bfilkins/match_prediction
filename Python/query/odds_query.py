@@ -1,7 +1,7 @@
 
 headers = {
     'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
-    'x-rapidapi-key': "c5c5e223d6msh45c25cf6ec57892p1aa1d2jsn43203354fc24"
+    'x-rapidapi-key': 
     }
 
 
