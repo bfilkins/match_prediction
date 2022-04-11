@@ -1,14 +1,14 @@
 
-# Packages ####
+# Load Packages ####
 source("R/environment/packages.R")
 source_python("Python/environment/packages.py")
 
-# Global and Functions ####
+# Define Global vars and Functions ####
 source("R/environment/globals.R")
 source("R/environment/define_query_functions.R")
 source_python("Python/environment/define_query_functions.py")
 
-# Theme ####
+# Define Theme for shiny app ####
 source("R/environment/theme.R")
 
 # Query and Save Data #### (this will all be modified when it points at AWS)
