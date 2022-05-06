@@ -23,11 +23,6 @@ selected_leagues <- leagues %>%
     by = c("join"= "join")
     )
 
-fixtures <- py$fixture_query(
-  api_key = Sys.getenv("rapid_api_key"), 
-  league = "140", 
-  year = "2021"
-  ) 
 
 # Query fixtures function
 fixtures_query <- function(league, year){
@@ -49,6 +44,8 @@ fixtures <- selected_leagues %>%
     ) %>%
   unnest()
 
+saveRDS(fixtures,"match_data.RDS")
+
 # Query fixture statistics ####
 # This is the function that can run costs up
 
@@ -63,6 +60,7 @@ new_match_statistics <- fixtures %>%
   unnest() %>%
   filter(!is.na(value))
 
+saveRDS(new_match_statistics,"match_statistics.RDS")
 # Need to fix: this anti join is redundant so I don't get recursive stuff ####
 # is this the right approach here?
 # match_statistics <- match_statistics %>%
@@ -77,4 +75,4 @@ new_match_statistics <- fixtures %>%
 
 # query odds (this still needs work) ####
 
-odds_data <- py$odds_query(api_key = Sys.getenv("rapid_api_key"),league = "140", year = "2021")
+#odds_data <- py$odds_query(api_key = Sys.getenv("rapid_api_key"),league = "140", year = "2021")

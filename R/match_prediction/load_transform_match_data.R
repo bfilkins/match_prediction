@@ -6,6 +6,8 @@ match_data_seleted <- match_data %>%
   select(
     fixture.id,fixture.status.long, score.fulltime.home, 
     score.fulltime.away, goals.home, goals.away, teams.home.id,
-       teams.home.name, teams.away.id, teams.away.name, date)
+    teams.home.name, teams.away.id, teams.away.name, fixture.date) %>%
+  mutate(date = date(fixture.date)) %>%
+  mutate_if(is_all_numeric,as.numeric)
 
-match_statistics <- read_parquet("match_stats.parquet")
+match_statistics <- readRDS("match_statistics.RDS")

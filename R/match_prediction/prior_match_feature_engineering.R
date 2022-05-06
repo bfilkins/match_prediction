@@ -78,11 +78,14 @@ new_match_structure.1 <- match_data_seleted %>%
 
 match_stats_wide <- match_statistics  %>%
   mutate(
-    fix = fix,
     clean_name = remove_non_alpha(type,""),
     clean_value = as.numeric(remove_non_alpha(value,""))
   ) %>%
   unnest(team) %>%
+  filter(clean_name != "Assists",clean_name != "CounterAttacks",clean_name != "CrossAttacks",
+         clean_name != "FreeKicks",clean_name != "Goals",
+         clean_name != "GoalAttempts",clean_name != "Substitutions",
+         clean_name != "Throwins",clean_name != "MedicalTreatment") %>%
   pivot_wider(
     id_cols = c(fix, id), 
     names_from = clean_name, 
@@ -119,11 +122,12 @@ match_list <- match_model_data  %>%
   group_by(fixture.id) %>%
   summarise()
 
-train_matches <- sample_n(match_list,300)
+train_matches <- sample_n(match_list,1000)
 
 # #Select model data ####
 model_data <- match_model_data %>%
-  select(fixture.id, 12:48)
+  select(fixture.id, 17:49) %>% 
+  select_if(~any(!is.na(.)))
 
 # Create balanced + normalized train and normalized test data sets #### 
 # next steps; abstract this section so features are list input
@@ -131,7 +135,7 @@ model_data <- match_model_data %>%
 train_data <- model_data %>%
   inner_join(train_matches, by = c("fixture.id" = "fixture.id")) %>%
   select(-fixture.id) %>%
-    recipe(target_outcome ~ ., data = .) %>%
+  recipe(target_outcome ~ ., data = .) %>%
   step_smote(target_outcome) %>%
   step_normalize(all_predictors()) %>%
   prep(retain = TRUE)
@@ -168,9 +172,11 @@ random_forest_model <<-
   set_engine("randomForest") %>%
   fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
 
-importance <- rownames_to_column(random_forest_model$fit$importance)
-importance <- random_forest_model$fit$importance %>%
-  unnest()
+
+#random_forest_model$fit$importance
+#importance <- rownames_to_column()
+#importance <- random_forest_model$fit$importance %>%
+#  unnest()
 
 
 #Predict on holdout data ####

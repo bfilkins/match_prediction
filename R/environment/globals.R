@@ -20,3 +20,7 @@ normalize <- function(x) {(x - min(x))/ (max(x)-min(x))}
 
 # preferences (I hate this unnecessary notation) ####
 options(scipen = 100000000)
+
+is_all_numeric <- function(x) {
+  !any(is.na(suppressWarnings(as.numeric(na.omit(x))))) & is.character(x)
+}
