@@ -12,7 +12,7 @@ source_python("Python/environment/define_query_functions.py")
 source("R/environment/theme.R")
 
 # Query and Save Data #### (this will all be modified when it points at AWS)
-source("R/environment/query_fixtures_and_statistics.R")
+# source("R/environment/query_fixtures_and_statistics.R")
 
 # Load Data #### (loads local data)
 source("R/match_prediction/load_transform_match_data.R")
@@ -48,14 +48,37 @@ ui = shinyUI(
             width = 3,
             div(
               id = "match_prediction_sidebar",
-              source("R/match_prediction/match_prediction_sidebar.R", local = TRUE)$value,
-              
-              tagList(
-                PrimaryButton.shinyInput("showModal", text = "Show modal", style = "background: grey; border: white"),
-                reactOutput("modal")
+              div(
+                width = 200,
+                div(
+                  tags$h4("Analysis Parameters", align = "ceneter"),
+                  fluidRow(
+                    div(
+                      style="display: inline-block; vertical-align:top; width: 100%;",
+                      sliderInput(
+                        inputId = "game_lag",
+                        label = "Prior Games",
+                        value =  12,
+                        min = 1,
+                        max = 20,
+                        step = 1,
+                        animate = animationOptions(interval = 150, loop = TRUE)),
+                      selectizeInput(
+                        inputId = "models_selected",
+                        label = "Prior Games",
+                        choices = c("logistic regression","trees"),
+                        multiple = TRUE
+                      ),
+                      tagList(
+                        PrimaryButton.shinyInput("showModal", text = "Show modal", style = "background: grey; border: white"),
+                        reactOutput("modal")
+                      )
+                    )
+                  )
+                )
               )
-              
-              )),
+              )
+            ),
           mainPanel(
             width = 9,
             titlePanel(h1("Model Performance", align = "center")), 
@@ -63,36 +86,34 @@ ui = shinyUI(
             column(width = 12,
             fluidRow(
               column(8,
-            plotOutput(
-              outputId = "roc_curve"
-                ),
-            
+            plotOutput(outputId = "roc_curve"),
             tagList(
               PrimaryButton.shinyInput("show_explain_roc", text = "definitions", style = "background: grey; border: white; align-text: center;"),
               reactOutput("explain_roc")
-              
             )),
-            column(4,
-                   style = "align-text: ceneter",
-            DT::dataTableOutput(
-              outputId = "performance_plot")
-            )))
-          )))
+            DT::dataTableOutput(outputId = "performance_plot")
+            )
+            )
+          )
           )
         )
       )
+    )
+  )
 
   
 
-thematic_shiny()
+#thematic_shiny()
 
 # Define Server
 server <- function(input, output, session) {
   source("R/match_prediction/match_prediction_server.R", local = TRUE)$value
   }
 # Create Shiny app ----
-runGadget(ui, server, viewer = dialogViewer("Dialog Title", width = 1600, height = 1000))
-
+# runGadget(ui, server, viewer = dialogViewer("Dialog Title", width = 1600, height = 1000))
+# Create Shiny app ----
+#shinyApp(ui = ui, server = server)
+runApp(list(ui = ui, server = server),host="127.0.0.1",port=5013, launch.browser = TRUE)
 
 
 

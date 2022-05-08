@@ -122,7 +122,7 @@ match_list <- match_model_data  %>%
   group_by(fixture.id) %>%
   summarise()
 
-train_matches <- sample_n(match_list,1000)
+train_matches <- sample_n(match_list,2000)
 
 # #Select model data ####
 model_data <- match_model_data %>%
@@ -225,8 +225,11 @@ performance_stats <- predicted %>%
     home_win_auc = map(home_win_data, .f = yardstick::roc_auc, truth = home_win, .pred_home_win),
     away_win_auc = map(away_win_data, .f = yardstick::roc_auc, truth = away_win, .pred_away_win),
     tie_auc = map(tie_data, .f = yardstick::roc_auc, truth = tie, .pred_tie)
-  ) #%>%
-  #unnest_wider(accuracy)
+    ) %>%
+  unnest_wider(c(accuracy, F1_score, recall, home_win_auc, away_win_auc, tie_auc), names_sep = "") %>%
+  select(model,contains("estimate"))
+
+  
 
 #Visualize ROC
  
