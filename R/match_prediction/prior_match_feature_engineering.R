@@ -232,40 +232,29 @@ performance_stats <- predicted %>%
   
 
 #Visualize ROC
+prediction_roc <- bind_rows(
+  predicted %>%
+    group_by(model) %>%
+    yardstick::roc_curve(truth = tie, .pred_tie) %>%
+    mutate(roc_group = "tie"),
+  predicted %>%
+    group_by(model) %>%
+    yardstick::roc_curve(truth = away_win, .pred_away_win) %>%
+    mutate(roc_group = "away win"),
+  predicted %>%
+    group_by(model) %>%
+    yardstick::roc_curve(truth = home_win, .pred_home_win) %>%
+    mutate(roc_group = "home win")
+  ) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+  geom_path() +
+  ggtitle("Classification of whether the away team will win or not is most accurate for all models") +
+  geom_abline(lty = 3, color = colors$grey) +
+  coord_equal() + 
+  theme_light_min() +
+  facet_wrap(facets = "roc_group", nrow = 1) +
+  labs(caption = "ROC curves plot model performance metrics across varied thresholds for discrimination \nThe area under the curve is a popular measure of separability between classes")
+prediction_roc
+
  
-tie_prediction_roc <- predicted %>%
-  group_by(model) %>%
-  yardstick::roc_curve(truth = tie, .pred_tie) %>%
-  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
-  geom_path() +
-  ggtitle("Tie")+
-  geom_abline(lty = 3) +
-  coord_equal() + 
-  theme(legend.position = "none")
 
-home_win_prediction_roc <- predicted %>%
-  group_by(model) %>%
-  yardstick::roc_curve(truth = home_win, .pred_home_win) %>%
-  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
-  geom_path() +
-  ggtitle("Home Win")+
-  geom_abline(lty = 3) +
-  coord_equal() + 
-  theme(legend.position = "none")
-
-away_win_prediction_roc <- predicted %>%
-  group_by(model) %>%
-  yardstick::roc_curve(truth = away_win, .pred_away_win) %>%
-  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
-  geom_path() +
-  ggtitle("Away Win")+
-  geom_abline(lty = 3) +
-  coord_equal()
-
-row_legend <- cowplot::get_legend(away_win_prediction_roc)
-
-away_win_prediction_roc <- away_win_prediction_roc +
-  theme(legend.position = "none")
-  
-thematic_on()
-cowplot::plot_grid(cowplot::plot_grid(home_win_prediction_roc,tie_prediction_roc,away_win_prediction_roc, nrow = 1), row_legend, nrow= 1, rel_widths = c(9,1))

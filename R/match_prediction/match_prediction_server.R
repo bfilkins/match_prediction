@@ -140,6 +140,7 @@ model_and_predict <- reactive(
   match_list <- define_model_data()  %>% 
       group_by(fixture.id) %>%
       summarise()
+  
   # define training sample  
   train_matches <- sample_n(match_list,2000)
 
@@ -179,7 +180,7 @@ model_and_predict <- reactive(
       fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
     
     # Random Forest
-    random_forest_model <<-
+    random_forest_model <-
       rand_forest(
         mode = "classification",
         trees = 2000
@@ -187,12 +188,9 @@ model_and_predict <- reactive(
       set_engine("randomForest") %>%
       fit(target_outcome ~ ., data = bake(train_data, new_data = NULL))
     
-    ####
+    # create feature importance table 
     #random_forest_model$fit$importance
-    #importance <- rownames_to_column()
-    #importance <- random_forest_model$fit$importance %>%
-    #  unnest()
-    
+    #feature_importance <- tibble(value = random_forest_model$fit$importance, name = rownames(random_forest_model$fit$importance))
     
     #Predict on holdout data ####
     
