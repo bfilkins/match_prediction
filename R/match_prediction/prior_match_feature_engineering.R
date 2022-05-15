@@ -228,7 +228,6 @@ performance_stats <- predicted %>%
     ) %>%
   unnest_wider(c(accuracy, F1_score, recall, home_win_auc, away_win_auc, tie_auc), names_sep = "") %>%
   select(model,contains("estimate"))
-
   
 
 #Visualize ROC
