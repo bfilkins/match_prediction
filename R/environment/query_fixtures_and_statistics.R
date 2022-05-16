@@ -42,7 +42,7 @@ fixtures <- selected_leagues %>%
       error = function(e) {NA}
       )
     ) %>%
-  unnest()
+  unnest(cols = matches_data)
 
 saveRDS(fixtures,"match_data.RDS")
 
@@ -51,7 +51,7 @@ saveRDS(fixtures,"match_data.RDS")
 
 new_match_statistics <- fixtures %>%
   mutate(fix = as.character(fixture.id)) %>%
-  #anti_join(match_statistics, by = c("fix" = "fix")) %>% #bring this back eventually?
+  anti_join(match_statistics, by = c("fix" = "fix")) #%>% #bring this back eventually?
   rowwise() %>%
   mutate(fixture_data = tryCatch(
     {lapply(fix, get_match_stats)},
