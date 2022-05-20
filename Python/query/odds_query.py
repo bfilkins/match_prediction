@@ -1,18 +1,18 @@
 
+
+import requests
+
+url = "https://api-football-v1.p.rapidapi.com/v3/odds"
+
+querystring = {"league":"140","season":"2021","date":"2022-05-15"}
+
 headers = {
-    'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
-    'x-rapidapi-key': 
-    }
+	"X-RapidAPI-Host": "api-football-v1.p.rapidapi.com",
+	"X-RapidAPI-Key": "c5c5e223d6msh45c25cf6ec57892p1aa1d2jsn43203354fc24"
+}
 
+odds_response = requests.request("GET", url, headers=headers, params=querystring)
 
-odds_url = "https://api-football-v1.p.rapidapi.com/v3/odds"
+odds_data = pd.json_normalize(json.loads(odds_response.text)["response"])
 
-# Query 2021 Laliga data
-laliga_2021_querystring = {"league":"140", "season":"2021"}
-
-laliga_2021_response_odds = requests.request("GET", odds_url, headers=headers, params=laliga_2021_querystring)
-
-laliga_2021_odds_data = pd.json_normalize(json.loads(laliga_2021_response_odds.text)["response"])
-
-
-
+print(response.text)

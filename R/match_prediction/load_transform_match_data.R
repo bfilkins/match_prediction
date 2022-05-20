@@ -11,3 +11,8 @@ match_data_seleted <- match_data %>%
   mutate_if(is_all_numeric,as.numeric)
 
 match_statistics <- readRDS("match_statistics.RDS")
+# This will need to be fixed (bug)
+match_statistics.0 <- match_statistics %>%
+  select(-team)
+
+write.csv(match_statistics.0, "match_statistics.csv")
