@@ -25,7 +25,7 @@ performance_table <- performance_stats %>%
       stripedColor = "#f6f8fa",
       highlightColor = "#f0f5f9",
       cellPadding = "8px 12px",
-      style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Varela Round")
+      style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Gotham Book")
     )
   )
 

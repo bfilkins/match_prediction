@@ -1,28 +1,36 @@
 
-# Load Packages ####
+# Load packages ####
 source("R/environment/packages.R")
-source_python("Python/environment/packages.py")
+#source_python("Python/environment/packages.py")
 
-# Define Global vars and Functions ####
+# Define aws connections
+source("R/environment/aws_connect.R")
+
+# Define global vars and functions ####
 source("R/environment/globals.R")
-source("R/environment/define_query_functions.R")
-source_python("Python/environment/define_query_functions.py")
 
-# Define Theme for shiny app ####
+# Define theme for shiny app ####
 source("R/environment/theme.R")
 
-# Query and Save Data #### (this will all be modified when it points at AWS)
+# Load aws data
+source("R/environment/load_aws_data.R")
+
+
+# Query and Save Data ####
+#(this will all be modified when it points at AWS)
+# source("R/environment/define_query_functions.R")
+# source_python("Python/environment/define_query_functions.py")
 # source("R/environment/query_fixtures_and_statistics.R")
 
-# Load Data #### (loads local data)
-source("R/match_prediction/load_transform_match_data.R")
+# Load data #### (loads local data)
+#source("R/match_prediction/load_transform_match_data.R")
 
 # non-app server script for development (move all this into server)
-source("R/match_prediction/prior_match_feature_engineering.R")
+#source("R/match_prediction/prior_match_feature_engineering.R")
 
-# Create App to explore modeling match outcome predictions using prior match data ####
+# Create app to explore modeling match outcome predictions using prior match data ####
 
-# Define UI for app
+# Define ui for app
 
 ui = shinyUI(
   fluidPage(
@@ -91,7 +99,7 @@ ui = shinyUI(
               PrimaryButton.shinyInput("show_explain_roc", text = "definitions", style = "background: grey; border: white; align-text: center;"),
               reactOutput("explain_roc")
             )),
-            DT::dataTableOutput(outputId = "performance_plot")
+            reactableOutput(outputId = "performance_plot")
             )
             )
           )
@@ -105,14 +113,12 @@ ui = shinyUI(
 
 #thematic_shiny()
 
-# Define Server
+# Define server
 server <- function(input, output, session) {
-  source("R/match_prediction/match_prediction_server.R", local = TRUE)$value
+  source("R/match_prediction/server.R", local = TRUE)$value
   }
-# Create Shiny app ----
-# runGadget(ui, server, viewer = dialogViewer("Dialog Title", width = 1600, height = 1000))
-# Create Shiny app ----
-#shinyApp(ui = ui, server = server)
+
+# Create shiny app ----
 runApp(list(ui = ui, server = server),host="127.0.0.1",port=5013, launch.browser = TRUE)
 
 

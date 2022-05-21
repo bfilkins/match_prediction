@@ -1,7 +1,13 @@
 # Create prior performance for home and away matches for each team going into a match #### 
+# variables
 games_back <- 12 
 
-new_match_structure.0 <-  match_data_seleted %>%
+
+# Model Data Transform ####
+match_data <-  tbl(athena_personal,in_schema("pitch-prophet","match_data")) %>%
+  collect()
+
+new_match_structure.0 <-  match_data %>%
   pivot_longer(cols = c( "teams.home.id", "teams.away.id")) %>%
   ungroup() %>%
   mutate(
@@ -51,7 +57,7 @@ new_match_structure.0 <-  match_data_seleted %>%
   drop_na()
 
 # Join features back to match level data for home and away teams ####
-new_match_structure.1 <- match_data_seleted %>%
+new_match_structure.1 <- match_data %>%
   inner_join(
     new_match_structure.0 %>%
       select(value, fixture.id, hometeams_goals_home = prior_games_goals_teams.home.id, hometeams_goals_away = prior_games_goals_teams.away.id),
@@ -76,12 +82,12 @@ new_match_structure.1 <- match_data_seleted %>%
 
 # Add match team level features ####
 
-match_stats_wide <- match_statistics  %>%
+match_stats_wide <- tbl(athena_personal,in_schema("pitch-prophet","match_statistics"))  %>%
+  collect() %>%
   mutate(
     clean_name = remove_non_alpha(type,""),
     clean_value = as.numeric(remove_non_alpha(value,""))
   ) %>%
-  unnest(team) %>%
   filter(clean_name != "Assists",clean_name != "CounterAttacks",clean_name != "CrossAttacks",
          clean_name != "FreeKicks",clean_name != "Goals",
          clean_name != "GoalAttempts",clean_name != "Substitutions",
@@ -247,7 +253,7 @@ prediction_roc <- bind_rows(
   ) %>%
   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
   geom_path() +
-  ggtitle("Classification of whether the away team will win or not is most accurate for all models") +
+  ggtitle("Classification performance strongest for away team win", "Ties are most diffiult to predict") +
   geom_abline(lty = 3, color = colors$grey) +
   coord_equal() + 
   theme_light_min() +
