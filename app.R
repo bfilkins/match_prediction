@@ -1,4 +1,5 @@
 
+renv::restore()
 # Load packages ####
 source("R/environment/packages.R")
 #source_python("Python/environment/packages.py")
